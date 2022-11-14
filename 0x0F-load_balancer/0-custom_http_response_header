@@ -1,29 +1,8 @@
 #!/usr/bin/env bash
 # a script that installs and redirects /redirect_me on nginx server
 
-sudo apt-get update
-sudo apt-get install -y nginx
-
-sudo mkdir -p /var/www/html
-sudo touch /var/www/html/index.html
-sudo echo "Hello World" > /var/www/html/index.html
-sudo touch /var/www/html/404.html
-sudo echo "Ceci n'est pas une page" > /var/www/html/404.html
-
-sudo printf %s "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By $HOSTNAME;
-    root   /var/www/html;
-    index  index.html index.htm;
-    location /redirect_me {
-        return 301 http://cuberule.com/;
-    }
-    error_page 404 /404.html;
-    location /404 {
-      root /var/www/html;
-      internal;
-    }
-}" > /etc/nginx/sites-available/default
-
+sudo apt-get -y update
+sudo apt-get -y install nginx
+sudo sed -e "52i \\\t\tadd_header X-Served-By '\$hostname';" -i /etc/nginx/sites-available/default;
 sudo service nginx restart
+sudo service nginx start
