@@ -7,10 +7,21 @@
 # Distribute requests using a roundrobin algorithm
 # Make sure that HAproxy can be managed via an init script
 sudo apt-get -y update
-sudo apt-get -y install --no-install-recommends software-properties-common
-sudo add-apt-repository -y ppa:vbernat/haproxy-2.6
+sudo apt-get -y upgrade
 sudo apt-get -y install haproxy
-sudo sed -e "34a frontend http\n\tbind *:80\n\tmode http\n\tdefault_backend feranmi_backend" -i /etc/haproxy/haproxy.cfg
-sudo sed -e "38a backend feranmi_backend\n\tbalance roundrobin\n\tserver 44626-web-01 54.209.207.219:80 check" -i /etc/haproxy/haproxy.cfg
-sudo sed -e "41a \\\tserver 44626-web-02 54.164.209.22:80 check" -i /etc/haproxy/haproxy.cfg
+
+echo "ENABLED=1" >> /etc/default/haproxy
+sudo mv /etc/haproxy/haproxy.cfg{,.original}
+sudo touch /etc/haproxy/haproxy.cfg
+
+printf %s "global
+    #!/usr/bin/env bash
+# a script that configures HAproxy in a load balancer 
+
+sudo apt-get -y install software-properties-common
+sudo add-apt-repository -y ppa:vbernat/haproxy-2.0
+sudo apt-get -y update
+sudo apt-get -y install haproxy=2.0.\*
+sudo chown -R $USER:$USER /etc/haproxy/haproxy.cfg
+echo -e "\nfrontend http\n\tbind *:80\n\tmode http\n\tdefault_backend web-backend\n\nbackend web-backend\n\tbalance roundrobin\n\tserver 35927-web-01 18.207.207.91 check\n\tserver 35927-web-02 52.201.166.187 check" >> /etc/haproxy/haproxy.cfg
 sudo service haproxy restart
